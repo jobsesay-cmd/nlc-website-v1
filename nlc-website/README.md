@@ -150,12 +150,12 @@ Use a **database-driven CMS pattern**:
 
 ### Required Initial Values (for setup only)
 
-- Super user password: `2115unit`
-- PostgreSQL database: `nlc-db`
-- PostgreSQL user: `nlc-user`
-- PostgreSQL password: `nl2115`
+- Super user password: `<set-via-secret-manager>`
+- PostgreSQL database: `<set-via-env>`
+- PostgreSQL user: `<set-via-env>`
+- PostgreSQL password: `<set-via-secret-manager>`
 
-> ⚠️ **Critical Security Warning:** Never hardcode these credentials in source code or commit them to Git. Use environment variables in `.env` files and secret managers in production.
+> ⚠️ **Critical Security Warning:** Never hardcode credentials (even in examples destined for source control). Keep all secrets in environment variables and a server-side secret manager; rotate any previously exposed credentials immediately.
 
 ### Security Controls to Implement
 
@@ -427,7 +427,12 @@ NODE_ENV=development
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
 # Database
-DATABASE_URL=postgresql://nlc-user:nl2115@localhost:5432/nlc-db?schema=public
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=<set-db-name>
+DB_USER=<set-db-user>
+DB_PASSWORD=<set-strong-db-password>
+DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
 
 # Auth
 AUTH_SECRET=replace-with-long-random-secret
@@ -435,7 +440,7 @@ AUTH_URL=http://localhost:3000
 
 # Admin bootstrap (one-time seed)
 SEED_SUPERADMIN_EMAIL=admin@nlc.gov.sl
-SEED_SUPERADMIN_PASSWORD=2115unit
+SEED_SUPERADMIN_PASSWORD=<set-secure-random-password>
 
 # File uploads
 UPLOAD_DIR=./uploads
@@ -545,9 +550,9 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: nlc-db
-      POSTGRES_USER: nlc-user
-      POSTGRES_PASSWORD: nl2115
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
@@ -631,7 +636,7 @@ docker compose up -d
 Example backup command:
 
 ```bash
-pg_dump -h localhost -U nlc-user -d nlc-db -Fc -f /backups/nlc-db-$(date +%F).dump
+PGPASSWORD="$DB_PASSWORD" pg_dump -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -Fc -f "/backups/${DB_NAME}-$(date +%F).dump"
 ```
 
 ---
