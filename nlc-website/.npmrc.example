@@ -1,0 +1,10 @@
+# Copy to .npmrc for restricted corporate networks.
+# Use your approved internal npm registry URL.
+registry=${NPM_CONFIG_REGISTRY}
+
+# Optional auth (if required by internal registry)
+# //your-registry-host/:_authToken=${NPM_TOKEN}
+
+# Optional proxy settings
+# proxy=${HTTP_PROXY}
+# https-proxy=${HTTPS_PROXY}
